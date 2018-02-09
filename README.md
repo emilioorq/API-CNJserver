@@ -31,61 +31,135 @@ Para explicarla vamos a ir por partes.
      
      // Paquete Request, que permnite realizar llamadas HTTP. También soporta HTTPS y redirecciones.
      const request = require('request'); 
+     
      // Paquete que permite limpiar todo el código de etiquetas HTML
      var sanitizeHtml = require('sanitize-html');
+     
      // Este paquete comprueba que el fichero JSON cumpla con el standar del fichero.
      var jsonlint = require("jsonlint");
      
      // Dirección web donde esta el códgo con la lista de los chistes.
      const url_chistes = 'https://www.emudesc.com/threads/548-verdades-y-chistes-de-chuck-norris.134614/';
+     
      // Comienza realizando una llamada a la url.
      request(url_chistes, { text: true }, (err, res, body) => {
          var re = /^\d{0,3}-?\s?(.*Chuck.+\.?)<br \/>/igm; //Expresión regular
+         
          var chisteEncontrado = re.exec(body); // Sobre el \'body\' se evalua la E.R.
+         
          chisteID = 1; //variable iteradora para recorrer el objeto donde se han almacenado los chistes.
+         
          var chistesArray = []; // Declaración del array donde se van a almacenar los chistes en JSON.
+         
          while (chisteEncontrado != null) { //Bucle para recorrer el objeto.
+         
              textoChiste = sanitizeHtml(chisteEncontrado[1]); //Se almacena el texto en la variable y se elimnan las etiquetas html. 
+             
              chisteObject = {id: chisteID, joke: textoChiste}; Se crea el objeto con la estructura JSON y se asignan los valores.
+             
              chistesArray.push(chisteObject); // El objeto completo se guarda en una posición del array.
+             
              chisteEncontrado = re.exec(body); // Se vuelve a evaluar la E.R sobre el contenido
+             
              chisteID++; // Se incrementa el iterador.
          }
          chistesJSON = JSON.stringify(chistesArray); El array completo, se parsea a un objeto JSON
+         
          console.log(chistesJSON); // Se muestra por pantalla.
+         
          jsonlint.parse(chistesJSON); // La herramienta jsonlint comprueba que la estructura del objeto es correcta.
+         
      }); <br/><br/>
+     
 ```
-    
+          
        
-       
-Para guardar la lista completa de los chiste en un fichero JSON, por consola invocamos el comando **node parsearchistes.js > ChistesCN4.json**   
+Para guardar la lista completa de los chiste en un fichero JSON, por consola invocamos el comando     
+**node parsearchistes.js > ChistesCN4.json**   
 
 #### Crear servidor de la API
-Lo siguiente que hacemos es montar un servicio API con el paquete **express**. Para este paso vamos a necesitar de otros paquetes adiccionales para mejorar la funcionalidad de nuetro servicio.
+Lo siguiente que hacemos es montar un servicio API con el paquete **express**.    
+Para este paso vamos a necesitar de otros paquetes adiccionales para mejorar la funcionalidad de nuetro servicio.
 
-```javascript
-
+```
+     // Express crea un servidor HTTP como servicio.
      var express = require('express');
-
+    
+    // En este caso vamos a usar un generador de números aleatorios para iterar el array de elemtos.
     var randomItem = require('random-item');
+    
+    // Paquete que permite la busqueda sobre un array de un identificador.
     var jsonQuery = require('json-query');
+    
+    // Sistema de ficheros para leer el fichero JSON
     var fs = require('fs');
 
+    // Se carga el contenido del fichero en el objeto chistes
     var chistes = JSON.parse(fs.readFileSync('ChistesCN4.json'));
-
+     
+    // Se crear el objeto con el servidor.
     var cnjserver = express();
+    
+    // El servidor proporciona una salida a la llamada GET, en la ruta de inicio (/)
     cnjserver.get('/',function(request, response){
-        response.json({mensaje: 'Hola desde Express!'});
+        response.json({mensaje: 'Hola desde Express!'}); // Le envia un mensaje.
     })
 
+    // En la ruta '/api/chistes' la salida será un elemento aleatorio del objeto chistes.
     cnjserver.get('/api/chistes',function(req,res,next){
         res.json(randomItem(chistes));
     })
 
+    // En esta salida, se puede proporcionar un identificador del elemento al final.
     cnjserver.get('/api/chistes/:id',function(req,res,next){
-        res.json(jsonQuery('[id='+req.params.id+']',{data: chistes}).value);
+    
+        // La herramienta de busqueda jsonQuery permite localizar un elemento pasandole unos parametros, en este caos el id.
+        res.json(jsonQuery('[id='+req.params.id+']',{data: chistes}).value); 
     })
+    
+    // Enviamos el servicio al puerto '5000'.
     cnjserver.listen(process.env.PORT || '5000');
 
 ```
+
+### Personalización de la App
+
+En estas lineas se agrega información del proyecto, a la vez que se usa para configurar la ejecución de la aplicación.
+
+```
+{
+  "name": "chuckserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node cnjserver.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.2",
+    "json-query": "^2.2.2",
+    "jsonlint-cli": "^1.0.1",
+    "random-item": "^1.0.0",
+    "request": "^2.83.0",
+    "sanitize-html": "^1.17.0"
+  }
+}
+
+```
+
+Para comenzar, se escribe en consola    
+**npm start**   
+
+**Dependencias**   
+Los paquetes que se usan en la aplicación para que funcione correctamente.    
+
+![Resultado de la app,'/api/chistes'](https://github.com/emilioorq/API-CNJserver/blob/master/03.jpg)
+
+![Resultado de la app,'/api/chistes/:id'](https://github.com/emilioorq/API-CNJserver/blob/master/04.jpg)
+
+
+
+
