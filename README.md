@@ -64,3 +64,28 @@ Para guardar la lista completa de los chiste en un fichero JSON, por consola inv
 #### Crear servidor de la API
 Lo siguiente que hacemos es montar un servicio API con el paquete **express**. Para este paso vamos a necesitar de otros paquetes adiccionales para mejorar la funcionalidad de nuetro servicio.
 
+```javascript
+
+     var express = require('express');
+
+    var randomItem = require('random-item');
+    var jsonQuery = require('json-query');
+    var fs = require('fs');
+
+    var chistes = JSON.parse(fs.readFileSync('ChistesCN4.json'));
+
+    var cnjserver = express();
+    cnjserver.get('/',function(request, response){
+        response.json({mensaje: 'Hola desde Express!'});
+    })
+
+    cnjserver.get('/api/chistes',function(req,res,next){
+        res.json(randomItem(chistes));
+    })
+
+    cnjserver.get('/api/chistes/:id',function(req,res,next){
+        res.json(jsonQuery('[id='+req.params.id+']',{data: chistes}).value);
+    })
+    cnjserver.listen(process.env.PORT || '5000');
+
+```
