@@ -156,10 +156,86 @@ Para comenzar, se escribe en consola
 **Dependencias**   
 Los paquetes que se usan en la aplicación para que funcione correctamente.    
 
-![Resultado de la app,'/api/chistes'](https://github.com/emilioorq/API-CNJserver/blob/master/03.jpg)
+![Resultado de la app,'/api/chistes'](https://github.com/emilioorq/API-CNJserver/blob/master/03.png)
 
-![Resultado de la app,'/api/chistes/:id'](https://github.com/emilioorq/API-CNJserver/blob/master/04.jpg)
-
-
+![Resultado de la app,'/api/chistes/:id'](https://github.com/emilioorq/API-CNJserver/blob/master/04.png)
 
 
+### Resultado Final
+
+```
+     <!DOCTYPE html>
+      <?php
+      header('Content-type: application/json');
+             header("Access-Control-Allow-Origin: *");
+
+     ?>
+
+     <html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+
+          <head>
+               <title>Laboratorio 2 | Desarrollo de Aplicaciones en Red</title>
+               <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+               <meta name="title" content="Servicio API">
+               <meta http-equiv="title" content="Laboratorio 2">
+               <meta name="country" content="Spain" />		
+               <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+               <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+     <!-- Estilo CSS -->
+               <link rel="stylesheet" href="#">
+     <!--	 JQUERY	 -->
+               <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+     <!--	 BOOTSTRAP	 -->
+               <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+               <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+     <style>
+     html {
+       min-height: 100%;
+       position: relative;
+     }
+     body {
+       margin: 0;
+       margin-bottom: 0;
+     }
+
+               .jumbotron {
+                    background-color: #1e5766;
+                    border-color: #eeefff;		
+                    color: #FFF;
+               }
+     </style>
+     <script>
+     function getJoke()
+     {
+         var xmlHttp = new XMLHttpRequest();
+          var addr = 'http://localhost:5000/api/chistes';
+         xmlHttp.onreadystatechange = function() { 
+             if (this.readyState == 4 && this.status == 200)
+                 //callback(this.responseText);
+                 console.log (this.responseText);
+                 document.getElementsByClassName('jumbotron').innerHtml = '<p style="color:#fff">'+this.responseText+'<p>';
+         }
+         xmlHttp.open("GET", addr, true); // true for asynchronous 
+         xmlHttp.send();
+     }
+
+
+     </script>
+
+     </head>
+     <body onload="getJoke();">
+          <div class="container">
+                    <div class="jumbotron text-center">
+                      <h1>CNJserver</h1>
+                      <h3> Chistes de Chuck Norris</h3>
+                    </div>
+
+          </div>
+     </body>
+     </html>
+
+```
